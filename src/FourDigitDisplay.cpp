@@ -39,6 +39,10 @@ void FourDigitDisplay::clearDisplay() {
     }
 }
 
+void FourDigitDisplay::setTwentyFourHour(bool state) {
+    twenty_four_hour = state;
+}
+
 void FourDigitDisplay::setDigit(int digit, int number) {
     #ifdef DEBUG_FOURDIGITDISPLAY
     Serial.println("FourDigitDisplay::setDigit(" + String(digit) + ", " + String(number) + ")");

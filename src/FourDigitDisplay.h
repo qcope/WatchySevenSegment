@@ -28,7 +28,8 @@ class FourDigitDisplay {
         void setDigit(int digit, int number);
         void setTime(int hour, int minute);
         void setInt(int number);
-        void setDecimalPoint(int digit, bool state);
+        void setTwentyFourHour(bool state);
+        // void setDecimalPoint(int digit, bool state);
         void display(GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *watchDisplay);
 };
 #endif // FOURDIGITDISPLAY_H
