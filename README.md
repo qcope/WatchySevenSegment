@@ -1,4 +1,5 @@
 # WatchySevevenSegment Watch Face
+![WatchySevenSegment screenshot](./watchysevensegment_screen.png)
 
 Firmware/Watch Face for the [SQFMI Watchy](https://watchy.sqfmi.com/) open source e-paper watch.
 
