@@ -11,8 +11,8 @@
 #define W_DATE_MODE     2
 #define W_QR_CODE_MODE  3
 
-#define QR_CODE_VERSION 5
-#define QR_CODE_PIXEL_SIZE 5
+#define QR_CODE_VERSION 4
+#define QR_CODE_PIXEL_SIZE 6
 #define QR_CODE_URL_TO_DISPLAY "https://github.com/qcope/WatchySevenSegment"
 
 RTC_DATA_ATTR int watchMode = W_12_HOUR_MODE;
@@ -22,7 +22,7 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
     public:
         MyFirstWatchFace(const watchySettings& s) : Watchy(s) {}
         void drawWatchFace(){ //override this method to customize how the watch face looks
-          display.fillScreen(GxEPD_WHITE); //clear the screen
+          display.fillScreen(GxEPD_WHITE); //clear the screen61
           
           if (watchMode != W_QR_CODE_MODE) { // We are not in QR code mode.... so let's tell the time!
             FourDigitDisplay oneLine = FourDigitDisplay(0, WatchyDisplay::HEIGHT / 4, WatchyDisplay::WIDTH, WatchyDisplay::HEIGHT / 2); //Middle of display
@@ -38,7 +38,7 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
           } else {
             // Let's create a QR code with the URL of the github for this code....
             // we'll use the qrcode library to do this
-            static char stringToCreateCodeFor[64]; // refer to QRCode library, README.md that explains the Data Capabalities of each
+            char stringToCreateCodeFor[90]; // refer to QRCode library, README.md that explains the Data Capabalities of each
                                                     // of the QR code versions.  For example version 8 can handle 122 characters for Alphanumeric
             if (qrTimeMode) {
               sprintf(stringToCreateCodeFor, "%02d:%02d", currentTime.Hour, currentTime.Minute);
@@ -49,7 +49,7 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
             int qrcodeversion=QR_CODE_VERSION;
             uint8_t qrcodeBytes[qrcode_getBufferSize(qrcodeversion)];
             int pixelSize = QR_CODE_PIXEL_SIZE;
-            qrcode_initText(&qrcode, qrcodeBytes, qrcodeversion, ECC_HIGH, stringToCreateCodeFor);
+            qrcode_initText(&qrcode, qrcodeBytes, qrcodeversion, ECC_MEDIUM, stringToCreateCodeFor);
             int xoffset = (display.width() - qrcode.size * pixelSize) / 2;
             int yoffset = (display.height() - qrcode.size * pixelSize) / 2;
 
