@@ -15,6 +15,8 @@ Not many!
 - Date of the month
 - QR code time display
 - QR code link to this GitHub project
+![WatchySevenSegment displaying QR code](./WatchySevenSegment_1.png)
+
 
 To cycle through the different time displays, press the lower right button. To display a QR code for the URL to this project,
 press the top right button. To return to the time display, press the lower right button.
