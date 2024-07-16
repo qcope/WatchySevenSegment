@@ -12,7 +12,7 @@
 #define W_QR_CODE_MODE  3
 
 #define QR_CODE_VERSION 4
-#define QR_CODE_PIXEL_SIZE 6
+#define QR_CODE_PIXEL_SIZE 5 // 6 pixels would work for this version 4 (33 x 33 pixels) but 5 gives a larger white border
 #define QR_CODE_URL_TO_DISPLAY "https://github.com/qcope/WatchySevenSegment"
 
 RTC_DATA_ATTR int watchMode = W_12_HOUR_MODE;
