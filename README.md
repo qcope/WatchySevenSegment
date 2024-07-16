@@ -30,3 +30,6 @@ with no issue but all recent work has been performed in PlatformIO.
 
 SevenSegmentDigit is the main class that represents a 7 segment display. FourDigitDisplay makes use of this to represent the
 four digit display, with a central colon, used in conventional bedside alarm clocks.
+
+QR codes are generated using the [QRCode](https://github.com/ricmoo/QRCode) library. Very straightforward to use. 
+Idea of displaying time using a QR Code .... shamelessly taken from the excelent [QR_Watchface](https://github.com/Cqoicebordel/Watchfaces/tree/main/QR_Watchface)!
