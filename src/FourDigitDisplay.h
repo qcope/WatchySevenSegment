@@ -6,14 +6,15 @@
 #include <Watchy.h>
 #include "SevenSegmentDigit.h"
 
-#define COLON_WIDTH 20  // SPACE FOR COLON
-#define COLON_RADIUS 5
+#define COLON_SCALE 10  
+#define COLON_RADIUS_SCALE 4
 
 class FourDigitDisplay {
     private:
         int x, y, width, height, digit_width;
         bool twenty_four_hour = false;
         bool colon = true;
+        int colon_width = 0, colon_radius = 0;
     
         SevenSegmentDigit digits[4]={
             SevenSegmentDigit(0,0,0,0),

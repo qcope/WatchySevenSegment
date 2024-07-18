@@ -15,6 +15,8 @@
 #define QR_CODE_PIXEL_SIZE 5 // 6 pixels would work for this version 4 (33 x 33 pixels) but 5 gives a larger white border
 #define QR_CODE_URL_TO_DISPLAY "https://github.com/qcope/WatchySevenSegment"
 
+#define SMALL_TIME_BORDER 3
+
 RTC_DATA_ATTR int watchMode = W_12_HOUR_MODE;
 RTC_DATA_ATTR bool qrTimeMode = true; // first button press... actually negates this... so you see URL rather that time first thing
 
@@ -22,34 +24,25 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
     public:
         MyFirstWatchFace(const watchySettings& s) : Watchy(s) {}
         void drawWatchFace(){ //override this method to customize how the watch face looks
-          display.fillScreen(GxEPD_WHITE); //clear the screen61
-          
-          if (watchMode != W_QR_CODE_MODE) { // We are not in QR code mode.... so let's tell the time!
-            FourDigitDisplay oneLine = FourDigitDisplay(0, WatchyDisplay::HEIGHT / 4, WatchyDisplay::WIDTH, WatchyDisplay::HEIGHT / 2); //Middle of display
-            if (watchMode == W_24_HOUR_MODE) {
-              oneLine.setTwentyFourHour(true); //set the time format to 24hr.... default is 12hr
-            }
-            if (watchMode == W_DATE_MODE) {
-              oneLine.setInt(currentTime.Day); //set the date on the display
-            } else {
-              oneLine.setTime(currentTime.Hour, currentTime.Minute); //set the time on the display
-            }
-            oneLine.display(&display); //display the time on the screen
-          } else {
-            // Let's create a QR code with the URL of the github for this code....
-            // we'll use the qrcode library to do this
-            char stringToCreateCodeFor[90]; // refer to QRCode library, README.md that explains the Data Capabalities of each
+
+          display.fillScreen(GxEPD_WHITE); //clear the screen first of all
+          // Now if we are going to display a QR code.... let's do that first
+          if (watchMode == W_QR_CODE_MODE) {
+            char stringToCreateCodeFor[90];         // refer to QRCode library, README.md that explains the Data Capabalities of each
                                                     // of the QR code versions.  For example version 8 can handle 122 characters for Alphanumeric
+            int errorCorrection=ECC_MEDIUM; // default... we may go higher... for a short string
             if (qrTimeMode) {
               sprintf(stringToCreateCodeFor, "%02d:%02d", currentTime.Hour, currentTime.Minute);
+              errorCorrection=ECC_HIGH; // we can afford to go higher for the time
             } else {
               sprintf(stringToCreateCodeFor, "%s",QR_CODE_URL_TO_DISPLAY);
             }
             QRCode qrcode;
             int qrcodeversion=QR_CODE_VERSION;
+            
             uint8_t qrcodeBytes[qrcode_getBufferSize(qrcodeversion)];
             int pixelSize = QR_CODE_PIXEL_SIZE;
-            qrcode_initText(&qrcode, qrcodeBytes, qrcodeversion, ECC_MEDIUM, stringToCreateCodeFor);
+            qrcode_initText(&qrcode, qrcodeBytes, qrcodeversion, errorCorrection, stringToCreateCodeFor);
             int xoffset = (display.width() - qrcode.size * pixelSize) / 2;
             int yoffset = (display.height() - qrcode.size * pixelSize) / 2;
 
@@ -63,7 +56,32 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
                 }
             }
           }
+
+          if ( (watchMode == W_12_HOUR_MODE) || (watchMode == W_24_HOUR_MODE) || (watchMode == W_DATE_MODE) )
+          {
+            FourDigitDisplay oneLine = FourDigitDisplay(0,display.height()/4,display.width(),display.height()/2 );
+            if (watchMode == W_24_HOUR_MODE) {
+              oneLine.setTwentyFourHour(true); //set the time format to 24hr.... default is 12hr
+            }
+            if (watchMode == W_DATE_MODE) {
+              oneLine.setInt(currentTime.Day); //set the date on the display
+            } else {
+              oneLine.setTime(currentTime.Hour, currentTime.Minute); //set the time on the display
+            }
+            oneLine.display(&display); //display the time on the screen
+          }
+
+          if ( (watchMode == W_QR_CODE_MODE) && qrTimeMode ) {
+            int xPos =  60, yPos = 85, width = 80, height = 30;
+            display.fillRect(xPos,yPos,width,height,GxEPD_WHITE);
+            display.drawRect(xPos,yPos,width,height,GxEPD_BLACK);
+            FourDigitDisplay oneLine = FourDigitDisplay(xPos+SMALL_TIME_BORDER,yPos+SMALL_TIME_BORDER,width - 2 * SMALL_TIME_BORDER,height - 2 * SMALL_TIME_BORDER);
+            oneLine.setTwentyFourHour(true); //set the time format to 24hr.... default is 12hr
+            oneLine.setTime(currentTime.Hour, currentTime.Minute); //set the time on the display
+            oneLine.display(&display); //display the time on the screen
+          }
         }
+        
         void handleButtonPress(){ 
           if (guiState == WATCHFACE_STATE) {
               uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();

@@ -20,13 +20,14 @@ FourDigitDisplay::FourDigitDisplay(int x, int y, int width, int height) {
 
     int colon_width = 0;    
     if (colon) {
-        colon_width = COLON_WIDTH; // We'll snuggle up the digits a bit, to create some space in the middle for the colon
+        colon_width = width / COLON_SCALE; // We'll snuggle up the digits a bit, to create some space in the middle for the colon
+        colon_radius = colon_width / COLON_RADIUS_SCALE;
     }
     digit_width = (width / 4) - (colon_width /  4);
     digits[0] = SevenSegmentDigit(x, y, digit_width, height);
     digits[1] = SevenSegmentDigit(x + digit_width, y, digit_width, height);
-    digits[2] = SevenSegmentDigit(width / 2 + colon_width / 2, y, digit_width, height);
-    digits[3] = SevenSegmentDigit(width / 2 + colon_width / 2 + digit_width, y, digit_width, height);
+    digits[2] = SevenSegmentDigit(x + width / 2 + colon_width / 2, y, digit_width, height);
+    digits[3] = SevenSegmentDigit(x + width / 2 + colon_width / 2 + digit_width, y, digit_width, height);
     
     #ifdef DEBUG_FOURDIGITDISPLAY
     Serial.println("FourDigitDisplay constructor end");
@@ -114,7 +115,7 @@ void FourDigitDisplay::display(GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> 
     }
     if (colon)
     {
-        watchDisplay->fillCircle(x + width / 2, y + height / 2 - COLON_WIDTH, COLON_RADIUS, GxEPD_BLACK);
-        watchDisplay->fillCircle(x + width / 2, y + height / 2 + COLON_WIDTH, COLON_RADIUS, GxEPD_BLACK);
+        watchDisplay->fillCircle(x + width / 2, y + height / 4, colon_radius, GxEPD_BLACK);
+        watchDisplay->fillCircle(x + width / 2, y + (height / 4) * 3, colon_radius, GxEPD_BLACK);
     }
 }
