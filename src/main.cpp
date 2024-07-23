@@ -9,16 +9,76 @@
 #define W_12_HOUR_MODE  0
 #define W_24_HOUR_MODE  1
 #define W_DATE_MODE     2
-#define W_QR_CODE_MODE  3
+#define W_ANALOG_MODE   3
+#define W_QR_CODE_MODE  4
 
 #define QR_CODE_VERSION 4
 #define QR_CODE_PIXEL_SIZE 5 // 6 pixels would work for this version 4 (33 x 33 pixels) but 5 gives a larger white border
 #define QR_CODE_URL_TO_DISPLAY "https://github.com/qcope/WatchySevenSegment"
 
 #define SMALL_TIME_BORDER 3
+#define LARGE_TICK_ANGLE 2 
+#define ANALOGUE_RADIUS 90
+#define HOUR_HAND_LENGTH 60
+#define HOUR_HAND_WIDTH 10
+#define MINUTE_HAND_LENGTH 85
+#define MINUTE_HAND_WIDTH 8
+#define CENTRE_CIRCLE_RADIUS 10
 
 RTC_DATA_ATTR int watchMode = W_12_HOUR_MODE;
 RTC_DATA_ATTR bool qrTimeMode = true; // first button press... actually negates this... so you see URL rather that time first thing
+
+class AnaloguePointer {
+  private:
+    int xCentre, yCentre, length, width;
+    int x1,y1,x2,y2,x3,y3,x4,y4;
+    GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *display;
+  public:
+    AnaloguePointer(int xCentre, int yCentre, int length, int width, GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *display) {
+      this->xCentre = xCentre;
+      this->yCentre = yCentre;
+      this->length = length;
+      this->width = width;
+      this->display = display;
+
+      // lets imagine the pointer vertical and pointing up
+      x1 = xCentre - width / 2;
+      x2 = xCentre + width / 2;
+      x3 = x2;
+      x4 = x1;
+      y1 = yCentre - length;
+      y2 = y1;
+      y3 = yCentre;
+      y4 = yCentre;
+    }
+    void rotate(int angle) {
+      if ( (angle <= 0) || (angle >= 360) ) {
+        return;
+      }
+      // Now rotate these four points about the centre... by the angle
+      int x1New = xCentre + (x1 - xCentre) * cos(angle * PI / 180) - (y1 - yCentre) * sin(angle * PI / 180);
+      int y1New = yCentre + (x1 - xCentre) * sin(angle * PI / 180) + (y1 - yCentre) * cos(angle * PI / 180);
+      int x2New = xCentre + (x2 - xCentre) * cos(angle * PI / 180) - (y2 - yCentre) * sin(angle * PI / 180);
+      int y2New = yCentre + (x2 - xCentre) * sin(angle * PI / 180) + (y2 - yCentre) * cos(angle * PI / 180);
+      int x3New = xCentre + (x3 - xCentre) * cos(angle * PI / 180) - (y3 - yCentre) * sin(angle * PI / 180);
+      int y3New = yCentre + (x3 - xCentre) * sin(angle * PI / 180) + (y3 - yCentre) * cos(angle * PI / 180);
+      int x4New = xCentre + (x4 - xCentre) * cos(angle * PI / 180) - (y4 - yCentre) * sin(angle * PI / 180);
+      int y4New = yCentre + (x4 - xCentre) * sin(angle * PI / 180) + (y4 - yCentre) * cos(angle * PI / 180);
+      x1 = x1New;
+      y1 = y1New;
+      x2 = x2New;
+      y2 = y2New;
+      x3 = x3New;
+      y3 = y3New;
+      x4 = x4New;
+      y4 = y4New;    
+    }
+    void draw() {
+      display->fillTriangle(x1, y1, x2, y2, x3, y3, GxEPD_BLACK);
+      display->fillTriangle(x4, y4, x3, y3, x1, y1, GxEPD_BLACK);
+    }
+};
+
 
 class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
     public:
@@ -70,6 +130,60 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
             }
             oneLine.display(&display); //display the time on the screen
           }
+
+          if (watchMode == W_ANALOG_MODE) {
+            int xCentre = display.width()/2;
+            int yCentre = display.height()/2;
+            // Let's draw ticks for each minute
+            int tickOffset;
+            for(int i=0; i<=45; i+=6) {
+                tickOffset = 100 * tan(i * PI / 180); // Who on earth wants RADIANS !!!!
+                display.drawLine(xCentre, yCentre, xCentre + tickOffset, 0, GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, display.width(), yCentre - tickOffset, GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, display.width(), yCentre + tickOffset, GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, xCentre + tickOffset, display.height(), GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, xCentre - tickOffset, display.height(), GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, 0, yCentre + tickOffset, GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, 0, yCentre - tickOffset, GxEPD_BLACK);
+                display.drawLine(xCentre, yCentre, xCentre - tickOffset, 0, GxEPD_BLACK); 
+            }
+            // Now draw some triangles for bigger marks for 12,3,6,9 HOUR MARKS 
+            tickOffset = 100 * tan(LARGE_TICK_ANGLE * PI / 180);
+            display.fillTriangle(xCentre, yCentre,xCentre + tickOffset, 0, xCentre - tickOffset, 0, GxEPD_BLACK);
+            display.fillTriangle(xCentre, yCentre,xCentre + tickOffset, display.height(), xCentre - tickOffset, display.height(), GxEPD_BLACK);
+            display.fillTriangle(xCentre, yCentre,0, yCentre + tickOffset, 0, yCentre - tickOffset, GxEPD_BLACK);
+            display.fillTriangle(xCentre, yCentre,display.width(), yCentre + tickOffset, display.width(), yCentre - tickOffset, GxEPD_BLACK);
+            // Now draw the triangles for 5, 10, 20, 25, 35, 40, 50, 55 minute marks
+            int tickOffset1 = 100 * tan( ( 30 - LARGE_TICK_ANGLE /2) * PI /180);
+            int tickOffset2 = 100 * tan( ( 30 + LARGE_TICK_ANGLE /2) * PI /180);
+            display.fillTriangle(xCentre,yCentre,xCentre + tickOffset1, 0, xCentre + tickOffset2, 0, GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,display.width(), yCentre - tickOffset1, display.width(), yCentre - tickOffset2, GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,display.width(), yCentre + tickOffset1, display.width(), yCentre + tickOffset2, GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,xCentre + tickOffset1, display.height(), xCentre + tickOffset2, display.height(), GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,xCentre - tickOffset1, display.height(), xCentre - tickOffset2, display.height(), GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,0, yCentre + tickOffset1, 0, yCentre + tickOffset2, GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,0, yCentre - tickOffset1, 0, yCentre - tickOffset2, GxEPD_BLACK);
+            display.fillTriangle(xCentre,yCentre,xCentre - tickOffset1, 0, xCentre - tickOffset2, 0, GxEPD_BLACK);
+            // Now white space in the middle
+            display.fillCircle(xCentre, yCentre, ANALOGUE_RADIUS, GxEPD_WHITE);
+
+            // Now let's work on the hands
+
+            AnaloguePointer hourHand = AnaloguePointer(xCentre, yCentre, HOUR_HAND_LENGTH, HOUR_HAND_WIDTH, &display);
+            AnaloguePointer minuteHand = AnaloguePointer(xCentre, yCentre, MINUTE_HAND_LENGTH, MINUTE_HAND_WIDTH, &display);
+
+            int hourAngle = (currentTime.Hour % 12) * 30 + currentTime.Minute / 2;
+            int minuteAngle = currentTime.Minute * 6;
+            
+            hourHand.rotate(hourAngle);
+            minuteHand.rotate(minuteAngle);
+
+            hourHand.draw();
+            minuteHand.draw();
+            display.fillCircle(xCentre, yCentre, CENTRE_CIRCLE_RADIUS, GxEPD_BLACK);
+
+           }
+
 
           if ( (watchMode == W_QR_CODE_MODE) && qrTimeMode ) {
             int xPos =  60, yPos = 85, width = 80, height = 30;
