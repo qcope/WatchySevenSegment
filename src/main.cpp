@@ -86,13 +86,17 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
         void drawWatchFace(){ //override this method to customize how the watch face looks
 
           display.fillScreen(GxEPD_WHITE); //clear the screen first of all
+          // Do some housework with the step counter... reset it at midnight
+          if (currentTime.Hour == 0 && currentTime.Minute == 0){
+            sensor.resetStepCounter();
+          }
           // Now if we are going to display a QR code.... let's do that first
           if (watchMode == W_QR_CODE_MODE) {
             char stringToCreateCodeFor[90];         // refer to QRCode library, README.md that explains the Data Capabalities of each
                                                     // of the QR code versions.  For example version 8 can handle 122 characters for Alphanumeric
             int errorCorrection=ECC_MEDIUM; // default... we may go higher... for a short string
             if (qrTimeMode) {
-              sprintf(stringToCreateCodeFor, "%02d:%02d", currentTime.Hour, currentTime.Minute);
+              sprintf(stringToCreateCodeFor, "T: %02d:%02d S: %d", currentTime.Hour, currentTime.Minute, sensor.getCounter());
               errorCorrection=ECC_HIGH; // we can afford to go higher for the time
             } else {
               sprintf(stringToCreateCodeFor, "%s",QR_CODE_URL_TO_DISPLAY);
