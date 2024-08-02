@@ -19,11 +19,14 @@
 #define SMALL_TIME_BORDER 3
 #define LARGE_TICK_ANGLE 2 
 #define ANALOGUE_RADIUS 90
-#define HOUR_HAND_LENGTH 60
-#define HOUR_HAND_WIDTH 10
-#define MINUTE_HAND_LENGTH 85
-#define MINUTE_HAND_WIDTH 8
-#define CENTRE_CIRCLE_RADIUS 10
+#define HOUR_HAND_LENGTH 55
+#define HOUR_HAND_WIDTH 20
+#define MINUTE_HAND_LENGTH 75
+#define MINUTE_HAND_WIDTH 20
+#define CENTRE_CIRCLE_RADIUS 2
+#define HAND_POINTS 9 // number of coordinates to define the hand
+#define HAND_BORDER 6
+#define FAT_END 3 // Make the hand bigger at the end!
 
 RTC_DATA_ATTR int watchMode = W_12_HOUR_MODE;
 RTC_DATA_ATTR bool qrTimeMode = true; // first button press... actually negates this... so you see URL rather that time first thing
@@ -31,7 +34,8 @@ RTC_DATA_ATTR bool qrTimeMode = true; // first button press... actually negates 
 class AnaloguePointer {
   private:
     int xCentre, yCentre, length, width;
-    int x1,y1,x2,y2,x3,y3,x4,y4;
+    int xPoint, yPoint;
+    int xPoints[HAND_POINTS], yPoints[HAND_POINTS];
     GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *display;
   public:
     AnaloguePointer(int xCentre, int yCentre, int length, int width, GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *display) {
@@ -42,40 +46,58 @@ class AnaloguePointer {
       this->display = display;
 
       // lets imagine the pointer vertical and pointing up
-      x1 = xCentre - width / 2;
-      x2 = xCentre + width / 2;
-      x3 = x2;
-      x4 = x1;
-      y1 = yCentre - length;
-      y2 = y1;
-      y3 = yCentre;
-      y4 = yCentre;
+      xPoints[0] = xCentre - FAT_END - width / 2;
+      xPoints[1] = xCentre + FAT_END + width / 2;
+      xPoints[2] = xCentre + width / 2;
+      xPoints[3] = xCentre - width / 2;
+
+      yPoints[0] = yCentre - length;
+      yPoints[1] = yCentre - length;
+      yPoints[2] = yCentre;
+      yPoints[3] = yCentre;
+
+      // We are going to have a tip at the end of the pointer
+      xPoints[4] = xCentre;
+      yPoints[4] = yCentre - length - width / 2; 
+
+      // Let's have a centre rectangle in the hand
+      xPoints[5] = xCentre - width / 2 + HAND_BORDER;
+      xPoints[6] = xCentre + width / 2 - HAND_BORDER;
+      xPoints[7] = xCentre + width / 2 - HAND_BORDER;
+      xPoints[8] = xCentre - width / 2 + HAND_BORDER;
+
+      yPoints[5] = yCentre - length + HAND_BORDER;
+      yPoints[6] = yCentre - length + HAND_BORDER;
+      yPoints[7] = yCentre - length / 3;
+      yPoints[8] = yCentre - length / 3;
+      
     }
     void rotate(int angle) {
       if ( (angle <= 0) || (angle >= 360) ) {
         return;
       }
-      // Now rotate these four points about the centre... by the angle
-      int x1New = xCentre + (x1 - xCentre) * cos(angle * PI / 180) - (y1 - yCentre) * sin(angle * PI / 180);
-      int y1New = yCentre + (x1 - xCentre) * sin(angle * PI / 180) + (y1 - yCentre) * cos(angle * PI / 180);
-      int x2New = xCentre + (x2 - xCentre) * cos(angle * PI / 180) - (y2 - yCentre) * sin(angle * PI / 180);
-      int y2New = yCentre + (x2 - xCentre) * sin(angle * PI / 180) + (y2 - yCentre) * cos(angle * PI / 180);
-      int x3New = xCentre + (x3 - xCentre) * cos(angle * PI / 180) - (y3 - yCentre) * sin(angle * PI / 180);
-      int y3New = yCentre + (x3 - xCentre) * sin(angle * PI / 180) + (y3 - yCentre) * cos(angle * PI / 180);
-      int x4New = xCentre + (x4 - xCentre) * cos(angle * PI / 180) - (y4 - yCentre) * sin(angle * PI / 180);
-      int y4New = yCentre + (x4 - xCentre) * sin(angle * PI / 180) + (y4 - yCentre) * cos(angle * PI / 180);
-      x1 = x1New;
-      y1 = y1New;
-      x2 = x2New;
-      y2 = y2New;
-      x3 = x3New;
-      y3 = y3New;
-      x4 = x4New;
-      y4 = y4New;    
+
+      for (int i=0; i < HAND_POINTS; i++) {
+        int xNew = xCentre + (xPoints[i] - xCentre) * cos(angle * PI / 180) - (yPoints[i] - yCentre) * sin(angle * PI / 180);
+        int yNew = yCentre + (xPoints[i] - xCentre) * sin(angle * PI / 180) + (yPoints[i] - yCentre) * cos(angle * PI / 180);
+        xPoints[i] = xNew;
+        yPoints[i] = yNew;
+      }
+      
     }
     void draw() {
-      display->fillTriangle(x1, y1, x2, y2, x3, y3, GxEPD_BLACK);
-      display->fillTriangle(x4, y4, x3, y3, x1, y1, GxEPD_BLACK);
+      // draw a black hand lets have a triangle at the tip
+      display->fillTriangle(xPoints[0], yPoints[0], xPoints[1], yPoints[1], xPoints[2], yPoints[2], GxEPD_BLACK);
+      display->fillTriangle(xPoints[3], yPoints[3], xPoints[2], yPoints[2], xPoints[0], yPoints[0], GxEPD_BLACK);
+      // display->fillCircle(xPoints[4], yPoints[4], width / 2, GxEPD_BLACK);
+      // Now the tip
+      display->fillTriangle(xPoints[0], yPoints[0], xPoints[1], yPoints[1], xPoints[4], yPoints[4], GxEPD_BLACK);
+      display->fillCircle(xCentre, yCentre, width / 2, GxEPD_BLACK);
+      // draw a white inner part to the hand
+      // display->fillCircle(xPoints[4], yPoints[4], (width / 2) - HAND_BORDER, GxEPD_BLACK);
+      // display->fillCircle(xCentre, yCentre, width / 2, GxEPD_BLACK);
+      display->fillTriangle(xPoints[5], yPoints[5], xPoints[6], yPoints[6], xPoints[7], yPoints[7], GxEPD_WHITE);
+      display->fillTriangle(xPoints[8], yPoints[8], xPoints[7], yPoints[7], xPoints[5], yPoints[5], GxEPD_WHITE);
     }
 };
 
@@ -184,8 +206,7 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
 
             hourHand.draw();
             minuteHand.draw();
-            display.fillCircle(xCentre, yCentre, CENTRE_CIRCLE_RADIUS, GxEPD_BLACK);
-
+            display.fillCircle(xCentre, yCentre, CENTRE_CIRCLE_RADIUS, GxEPD_WHITE); // draw the centre circle
            }
 
 
