@@ -16,6 +16,7 @@ Not many!
 - Date of the month
 - QR code time display
 - QR code link to this GitHub project
+- Traditional analoge display
 
 ![WatchySevenSegment displaying QR code](./WatchySevenSegment_2.png)
 
