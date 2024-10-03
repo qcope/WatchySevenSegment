@@ -4,9 +4,9 @@
 Firmware/Watch Face for the [SQFMI Watchy](https://watchy.sqfmi.com/) open source e-paper watch.
 
 This Watch Face displays time with digits, similar to seven segment displays. In functionality and appearance, the watch face
-is similar to the basic 7Seg example and others. Rather than using a font that looks similar to an old display
+is similar to the basic 7Seg example and others. Rather than using a font that looks similar to an old display,
 in this code, objects are used to model the individual LED/segments 
-of such a display, using the conventional labelling of these (A,B,C,D,E,F and G). To display `1` on a digt, the code turns
+of such a display, using the conventional labelling of these (A,B,C,D,E,F and G). To display `1` on a digit, the code turns
 segments `B` and segment `C` on and leaves all the rest off....
 
 ## Features
