@@ -36,7 +36,7 @@ FourDigitDisplay::FourDigitDisplay(int x, int y, int width, int height) {
 
 void FourDigitDisplay::clearDisplay() {
     for (int i = 0; i < 4; i++) {
-        digits[i].setNumber(0);
+        digits[i].clearDigit();
     }
 }
 
@@ -66,6 +66,10 @@ void FourDigitDisplay::setTime(int hours, int minutes) {
         {
             hours -= 12;
         }
+        if (hours == 0)
+        {
+            hours = 12;
+        }
         if (hours >=10) {
             setDigit(0, hours / 10);
             setDigit(1, hours % 10);
@@ -76,7 +80,22 @@ void FourDigitDisplay::setTime(int hours, int minutes) {
     }
     setDigit(2, minutes / 10);
     setDigit(3, minutes % 10);
+    colon = true;  // We have a time to display.... so we'll display the colon
+    decimal_point = false; // no decimal point for time
+}
 
+void FourDigitDisplay::setSWTime(int minutes, int seconds) {
+    #ifdef DEBUG_FOURDIGITDISPLAY
+    Serial.println("FourDigitDisplay::setSWTime(" + String(minutes) + ", " + String(seconds) + ")");
+    #endif
+    minutes = minutes % 100;
+    seconds = seconds % 60;
+    setDigit(0, minutes / 10);
+    setDigit(1, minutes % 10);
+    setDigit(2, seconds / 10);
+    setDigit(3, seconds % 10);
+    colon = true;  // We have a time to display.... so we'll display the colon
+    decimal_point = false; // no decimal point for time
 }
 
 void FourDigitDisplay::setInt(int value) {
@@ -106,16 +125,27 @@ void FourDigitDisplay::setInt(int value) {
     }
     digitValue= value % 10;
     setDigit(3, digitValue);
-    
+    decimal_point = false; 
+    colon = false;
+}
+
+void FourDigitDisplay::setColon(bool state) {
+    colon = state;
+}
+
+void FourDigitDisplay::setDecimalPoint(bool state) {
+    decimal_point = state;
 }
 
 void FourDigitDisplay::display(GxEPD2_BW <WatchyDisplay, WatchyDisplay::HEIGHT> *watchDisplay) {
     for (int i = 0; i < 4; i++) {
         digits[i].display(watchDisplay);
     }
-    if (colon)
+    if (colon || decimal_point)
     {
-        watchDisplay->fillCircle(x + width / 2, y + height / 4, colon_radius, GxEPD_BLACK);
         watchDisplay->fillCircle(x + width / 2, y + (height / 4) * 3, colon_radius, GxEPD_BLACK);
+        if ( ! decimal_point ) {
+            watchDisplay->fillCircle(x + width / 2, y + height / 4, colon_radius, GxEPD_BLACK);
+        }
     }
 }

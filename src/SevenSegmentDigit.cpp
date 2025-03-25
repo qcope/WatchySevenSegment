@@ -42,7 +42,7 @@ SevenSegmentDigit::SevenSegmentDigit(int x, int y, int width, int height) {
          case 6: sevensegment.setSegmentState('a', true); sevensegment.setSegmentState('c', true); sevensegment.setSegmentState('d', true); sevensegment.setSegmentState('e', true); sevensegment.setSegmentState('f', true); sevensegment.setSegmentState('g', true); break;
          case 7: sevensegment.setSegmentState('a', true); sevensegment.setSegmentState('b', true); sevensegment.setSegmentState('c', true); break;
          case 8: sevensegment.setSegmentState('a', true); sevensegment.setSegmentState('b', true); sevensegment.setSegmentState('c', true); sevensegment.setSegmentState('d', true); sevensegment.setSegmentState('e', true); sevensegment.setSegmentState('f', true); sevensegment.setSegmentState('g', true); break;
-         case 9: sevensegment.setSegmentState('a', true); sevensegment.setSegmentState('b', true); sevensegment.setSegmentState('c', true); sevensegment.setSegmentState('f', true); sevensegment.setSegmentState('g', true); break;
+         case 9: sevensegment.setSegmentState('a', true); sevensegment.setSegmentState('b', true); sevensegment.setSegmentState('c', true); sevensegment.setSegmentState('d', true); sevensegment.setSegmentState('f', true); sevensegment.setSegmentState('g', true); break;
       }
   }
 
