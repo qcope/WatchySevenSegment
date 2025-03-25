@@ -29,14 +29,14 @@ The following modes:
   
 are cycled through, by pressing the bottom right button. Whilst in the stopwatch mode, top right button
 starts the timer. Pressing top right again leaves the timer running but pauses the screep update. The "LAP"
-flag is displayed. Further press of top right resumes the normal running of the stopwatch. To reset a running
-timer, pause the timer ("LAP" displayed) then press the top left button. Confirmation of the operation of the
-stopwatch functions, is provided by brief vibrations.
+flag is displayed. Further press of top right resumes the normal running of the stopwatch. The "RUN" flag is displayed. To reset a running
+timer, pause the timer by pressing top right. The "LAP" flag is  displayed. Press the top left button and the timer is reset. Confirmation of the operation of the
+stopwatch functions, are provided by brief vibrations.
 
 Top right button, displays:
 - Analog watch
 - QR code linking back to this GitHub repository
-- QR code displaying time and in the QR code, debug information for the status of the watch
+- QR code displaying time and in the QR code, debug information for the status of the watch is included in the text of the QR code.
   
 pressing the top right button cycles through these screens.
 
